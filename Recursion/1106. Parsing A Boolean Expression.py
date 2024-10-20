@@ -1,0 +1,54 @@
+"""
+Statement: A boolean expression is an expression that evaluates to either true or false. It can be in one of the following shapes:
+
+'t' that evaluates to true.
+'f' that evaluates to false.
+'!(subExpr)' that evaluates to the logical NOT of the inner expression subExpr.
+'&(subExpr1, subExpr2, ..., subExprn)' that evaluates to the logical AND of the inner expressions subExpr1, subExpr2, ..., subExprn where n >= 1.
+'|(subExpr1, subExpr2, ..., subExprn)' that evaluates to the logical OR of the inner expressions subExpr1, subExpr2, ..., subExprn where n >= 1.
+Given a string expression that represents a boolean expression, return the evaluation of that expression.
+
+It is guaranteed that the given expression is valid and follows the given rules.
+
+Input: expression = "&(|(f))"
+Output: false
+"""
+
+#Official solution
+class Solution:
+    def parseBoolExpr(self, expression: str) -> bool:
+        st = deque()
+
+        # Traverse through the expression
+        for curr_char in expression:
+            if curr_char == "," or curr_char == "(":
+                curr_char  # Skip commas and open parentheses
+
+            # Push operators and boolean values to the stack
+            if curr_char in ["t", "f", "!", "&", "|"]:
+                st.append(curr_char)
+
+            # Handle closing parentheses and evaluate the subexpression
+            elif curr_char == ")":
+                has_true = False
+                has_false = False
+
+                # Process the values inside the parentheses
+                while st[-1] not in ["!", "&", "|"]:
+                    top_value = st.pop()
+                    if top_value == "t":
+                        has_true = True
+                    elif top_value == "f":
+                        has_false = True
+
+                # Pop the operator and evaluate the subexpression
+                op = st.pop()
+                if op == "!":
+                    st.append("t" if not has_true else "f")
+                elif op == "&":
+                    st.append("f" if has_false else "t")
+                else:
+                    st.append("t" if has_true else "f")
+
+        # The final result is at the top of the stack
+        return st[-1] == "t"
